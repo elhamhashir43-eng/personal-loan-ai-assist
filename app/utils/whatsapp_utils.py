@@ -62,6 +62,42 @@ def send_message(data):
         log_http_response(response)
         return response
 
+def mark_as_read(message_id):
+    try:
+        data = json.dumps({
+            "messaging_product": "whatsapp",
+            "status": "read",
+            "message_id": message_id
+        })
+        headers = {
+            "Content-type": "application/json",
+            "Authorization": f"Bearer {current_app.config['ACCESS_TOKEN']}",
+        }
+        url = f"https://graph.facebook.com/{current_app.config['VERSION']}/{current_app.config['PHONE_NUMBER_ID']}/messages"
+        requests.post(url, data=data, headers=headers, timeout=5)
+    except Exception as e:
+        logging.warning(f"Failed to mark as read: {e}")
+
+def send_typing_indicator(wa_id):
+    try:
+        data = json.dumps({
+            "messaging_product": "whatsapp",
+            "recipient_type": "individual",
+            "to": wa_id,
+            "type": "typing_indicator",
+            "typing_indicator": {
+                "type": "text"
+            }
+        })
+        headers = {
+            "Content-type": "application/json",
+            "Authorization": f"Bearer {current_app.config['ACCESS_TOKEN']}",
+        }
+        url = f"https://graph.facebook.com/{current_app.config['VERSION']}/{current_app.config['PHONE_NUMBER_ID']}/messages"
+        requests.post(url, data=data, headers=headers, timeout=5)
+    except Exception as e:
+        logging.warning(f"Failed to send typing indicator: {e}")
+
 def process_whatsapp_message(body):
     wa_id = body["entry"][0]["changes"][0]["value"]["contacts"][0]["wa_id"]
     name = body["entry"][0]["changes"][0]["value"]["contacts"][0]["profile"]["name"]
@@ -75,6 +111,10 @@ def process_whatsapp_message(body):
         return
 
     logging.info(f"Received message from {name} ({wa_id}): {message_body}")
+
+    # Mark the incoming message as read and show typing indicator
+    mark_as_read(message_id)
+    send_typing_indicator(wa_id)
 
     final_response = handle_loan_conversation(wa_id, name, message_body, send_message_callback=send_message)
 

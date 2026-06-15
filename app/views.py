@@ -1,5 +1,6 @@
 import logging
 import json
+import threading
 
 from flask import Blueprint, request, jsonify, current_app
 
@@ -29,7 +30,13 @@ def handle_message():
 
     try:
         if is_valid_whatsapp_message(body):
-            process_whatsapp_message(body)
+            # Run processing in a background thread to return 200 OK immediately and prevent Meta retries
+            app_instance = current_app._get_current_object()
+            def background_task(payload, app):
+                with app.app_context():
+                    process_whatsapp_message(payload)
+            
+            threading.Thread(target=background_task, args=(body, app_instance)).start()
             return jsonify({"status": "ok"}), 200
         else:
             return (

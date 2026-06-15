@@ -13,11 +13,11 @@ def load_configurations(app):
     app.config["VERIFY_TOKEN"] = os.getenv("VERIFY_TOKEN")
     
     # LLM provider selection
-    app.config["LLM_PROVIDER"] = os.getenv("LLM_PROVIDER", "openai").lower()
+    app.config["LLM_PROVIDER"] = os.getenv("LLM_PROVIDER", "gemini").lower()
     app.config["OPENAI_API_KEY"] = os.getenv("OPENAI_API_KEY")
     app.config["OPENAI_MODEL"] = os.getenv("OPENAI_MODEL", "gpt-4.1-nano")
     app.config["GOOGLE_API_KEY"] = os.getenv("GOOGLE_API_KEY")
-    app.config["GEMINI_MODEL"] = os.getenv("GEMINI_MODEL", "gemini-2.0-flash")
+    app.config["GEMINI_MODEL"] = os.getenv("GEMINI_MODEL", "gemini-2.5-flash-lite")
 
     # WhatsApp number of the operator who receives human-escalation summaries
     app.config["OPERATOR_WAID"] = os.getenv("OPERATOR_WAID")

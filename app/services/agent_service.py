@@ -51,12 +51,13 @@ How may I assist you today?"
 * Keep responses concise and professional.
 * Never guarantee loan approval.
 
-### Language Rules (VERY IMPORTANT - FOLLOW EXACTLY)
-* Two possible languages: English, and Manglish (= Malayalam written using English/Latin letters, e.g. "Enikku oru loan venam", "Ethra aanu interest rate?").
-* Detect the language of the customer's CURRENT (latest) message and reply ONLY in that same language.
-* The customer may switch languages between messages. Always match the MOST RECENT message. If their last message was English, reply in English; if it was Manglish, reply in Manglish. Do not be influenced by earlier messages.
-* NEVER mix the two in one reply, and NEVER add a translation in brackets or parentheses. One language only.
-* When replying in Manglish, keep it natural Manglish (Malayalam in Latin script). Do not write in the Malayalam script and do not slip into pure English.
+### LANGUAGE CONFORMANCE (CRITICAL STRICT RULE)
+* You must strictly detect the exact language and script of the customer's MOST RECENT message.
+* If the customer's very last message was in Manglish (Malayalam written in English letters), your ENTIRE response MUST be fully translated and written in Manglish.
+* If their last message was in English, your ENTIRE response MUST be in English.
+* NEVER output a response that mixes English and Manglish.
+* NEVER look at the language of the previous chat history to determine your response language. ONLY look at the very last message they sent.
+* Even if you are returning standard loan details, tables, or numbers, you MUST fully translate every single word into the language of the customer's last message.
 
 Example:
 
@@ -236,12 +237,14 @@ Examples:
 Reason:
 Customer Requested Callback
 
-### Extended Conversation
+### Genuine Interest & Qualification
 
-If customer sends more than 5 messages and eligibility assessment is still incomplete.
+If the customer shows genuine interest in proceeding with a loan after the preliminary assessment, do not escalate immediately. 
+Instead, ask: "I'd like to connect you with our loan advisor to take this forward. Could you please let me know your preferred date and time for a quick call?"
+Only call `schedule_callback` and `escalate_to_human` AFTER they provide their preferred time.
 
 Reason:
-Extended Qualification Assistance Required
+Qualified Lead - Genuine Interest
 
 ### Repeated Confusion
 
@@ -416,19 +419,7 @@ Monthly Income: {monthly_income}
 
         return "Escalation successful. Inform the user that a specialist will contact them."
 
-    # --- Rule 2: Excessive Conversation Length ---
-    # Escalate if more than 5 messages before eligibility assessment is completed
-    if MESSAGE_COUNTS[wa_id] > 5 and not ESCALATION_STATUS[wa_id]:
-        _escalate_to_human(
-            customer_name=name,
-            mobile_number=wa_id,
-            loan_amount="Not Provided",
-            preferred_bank="Not Provided",
-            employment_type="Not Provided",
-            monthly_income="Not Provided",
-            escalation_reason="Extended Qualification Assistance Required"
-        )
-        return "I'd like to ensure you receive the best assistance possible. I am escalating your request to a loan specialist who can guide you further."
+    # (The 5-message automatic escalation rule has been removed to allow natural qualification)
 
     # --- Schedule Callback Tool ---
     def _schedule_callback(
